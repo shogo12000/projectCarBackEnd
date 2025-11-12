@@ -16,6 +16,8 @@ const allowedOrigins = [
     "https://carfrontend-git-main-sidneys-projects-2af13f64.vercel.app",
     "https://carfrontend-rust.vercel.app/",
     "https://carfrontend-rust.vercel.app",
+    "https://project-car-back-end.vercel.app/health",
+    "https://project-car-back-end.vercel.app/health/",
 ];
 
 app.use(cors({
