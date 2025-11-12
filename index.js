@@ -8,7 +8,8 @@ const app = express();
 
 const allowedOrigins = [
     "http://localhost:5174/",
-    "http://localhost:5174"
+    "http://localhost:5174",
+    "https://carfrontend-ptv4v8k65-sidneys-projects-2af13f64.vercel.app/",
 ];
 
 app.use(cors({
