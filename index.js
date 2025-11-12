@@ -12,12 +12,10 @@ const app = express();
 
 
 const allowedOrigins = [
-    "http://localhost:5174/",
-    "http://localhost:5174",
-    "https://carfrontend-ptv4v8k65-sidneys-projects-2af13f64.vercel.app/",
-    "https://carfrontend-git-main-sidneys-projects-2af13f64.vercel.app",
-    "https://carfrontend-rust.vercel.app/",
-    "https://carfrontend-rust.vercel.app", 
+  "http://localhost:5174",
+  "https://carfrontend-rust.vercel.app",
+  "https://carfrontend-git-main-sidneys-projects-2af13f64.vercel.app",
+  "https://carfrontend-k7ioppyld-sidneys-projects-2af13f64.vercel.app"
 ];
 
 app.use(cors({
@@ -48,7 +46,7 @@ app.get("/health", (req, res) => {
 });
 
 export default async function handler(req, res) {
-  await connectDB(); // garante conexão antes de responder
+  await connectDB();  
   return app(req, res);
 }
 
