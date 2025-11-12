@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from 'dotenv';
 import { connectDB } from "./mongoose/mongoose.mjs";
-
+import mongoose from "mongoose";
 dotenv.config();
 
 const app = express();
@@ -34,6 +34,15 @@ app.use(express.json());
 
 app.get("/", (req, res) => {
     res.status(200).json({ msg: "Servidor rodando!" });
+});
+
+app.get("/health", (req, res) => {
+    const state = mongoose.connection.readyState;
+    if (state === 1) {
+        res.status(200).json({ status: "MongoDB connected" });
+    } else {
+        res.status(500).json({ status: "MongoDB not connected", state });
+    }
 });
 
 const PORT = 3000;
