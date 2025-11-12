@@ -1,10 +1,13 @@
 import express from "express";
 import cors from "cors";
 import dotenv from 'dotenv';
+import { connectDB } from "./mongoose/mongoose.mjs";
 
 dotenv.config();
 
 const app = express();
+
+connectDB();
 
 const allowedOrigins = [
     "http://localhost:5174/",
@@ -16,8 +19,7 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-    origin: function (origin, callback) {
-        // Se não houver origin (ex: Postman) ou se estiver na lista de permitidos
+    origin: function (origin, callback) { 
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
