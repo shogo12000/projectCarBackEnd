@@ -3,13 +3,13 @@ import cors from "cors";
 import dotenv from 'dotenv';
 import { connectDB } from "./mongoose/mongoose.mjs";
 import mongoose from "mongoose";
-dotenv.config();
+import carsRoutes from "./routes/carRoutes.mjs";
 
- 
+dotenv.config(); 
 
-const app = express();
+//connectDB();
 
-
+const app = express(); 
 
 const allowedOrigins = [
   "http://localhost:5174",
@@ -32,6 +32,8 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+app.use("/cars", carsRoutes);
 
 app.get("/", (req, res) => {
     res.status(200).json({ msg: "Servidor rodando!" });

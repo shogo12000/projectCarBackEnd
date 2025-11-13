@@ -21,3 +21,5 @@ const UserSchema = new Schema({
         trim: true,
     }
 })
+
+export const UserSchem = mongoose.model("carusers", UserSchema);
