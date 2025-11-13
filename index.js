@@ -13,6 +13,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:5174",
+  "http://localhost:5173",
   "https://carfrontend-rust.vercel.app",
   "https://carfrontend-git-main-sidneys-projects-2af13f64.vercel.app",
   "https://carfrontend-k7ioppyld-sidneys-projects-2af13f64.vercel.app"
