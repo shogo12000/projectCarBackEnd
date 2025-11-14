@@ -7,7 +7,7 @@ import carsRoutes from "./routes/carRoutes.mjs";
 
 dotenv.config(); 
 
-//connectDB();
+// connectDB();
 
 const app = express(); 
 
