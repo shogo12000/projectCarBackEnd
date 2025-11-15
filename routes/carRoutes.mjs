@@ -2,21 +2,19 @@ import express from 'express';
 import { UserModel } from '../mongoose/UserSchema.mjs';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { registerSchema, loginSchema } from '../utils/validationSchemas.mjs';
+import { validationResult, matchedData } from 'express-validator';
 
 const carsRoutes = express.Router();
 
 
-carsRoutes.post('/register', async (req, res) => {
-    const { email, username, password } = req.body;
+carsRoutes.post('/register', registerSchema, async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array() });
+
     const saltRounds = 10;
-
-    if (!email || !username || !password) {
-        return res.status(400).json({ message: "All fields are required" });
-    }
-
-    if (password.trim().length < 5) {
-        return res.status(400).json({ message: "Password must be at least 5 characters long" });
-    }
+    const { email, username, password } = matchedData(req);
 
     const emailExists = await UserModel.findOne({ email });
 
@@ -40,8 +38,13 @@ carsRoutes.post('/register', async (req, res) => {
     }
 })
 
-carsRoutes.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+carsRoutes.post('/login', loginSchema, async (req, res) => {
+    const errors = validationResult(req);
+
+    console.log(errors.array());
+    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array() });
+
+    const { email, password } = matchedData(req);
 
     const findUser = await UserModel.findOne({ email: email })
 
