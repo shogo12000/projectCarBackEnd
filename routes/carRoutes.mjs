@@ -1,6 +1,7 @@
 import express from 'express';
 import { UserModel } from '../mongoose/UserSchema.mjs';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 const carsRoutes = express.Router();
 
@@ -50,12 +51,27 @@ carsRoutes.post('/login', async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, findUser.password);
 
-    console.log(isMatch);
     if (!isMatch) {
         return res.status(401).json({ msg: "Invalid username or password" });
     }
 
-    return res.status(200).json({ findUser });
+    const token = jwt.sign(
+        { username: findUser.username, email: findUser.email },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+    );
+
+    return res.status(200).cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        expires: new Date(Date.now() + 60 * 60 * 1000),
+    }).json({
+        message: "Login successful",
+        id: findUser._id,
+        username: findUser.username,
+        email: findUser.email,
+    });
 })
 
 export default carsRoutes;
