@@ -17,9 +17,8 @@ const UserSchema = new Schema({
     password: {
         type: String,
         required: true,
-        lowercase: true,
         trim: true,
     }
 })
 
-export const UserSchem = mongoose.model("carusers", UserSchema);
+export const UserModel = mongoose.model("carusers", UserSchema);

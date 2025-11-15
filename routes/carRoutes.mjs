@@ -1,12 +1,13 @@
 import express from 'express';
-import { UserSchem } from '../mongoose/UserSchema.mjs';
+import { UserModel } from '../mongoose/UserSchema.mjs';
 import bcrypt from 'bcryptjs';
 
 const carsRoutes = express.Router();
-const saltRounds = 10;
+
 
 carsRoutes.post('/register', async (req, res) => {
     const { email, username, password } = req.body;
+    const saltRounds = 10;
 
     if (!email || !username || !password) {
         return res.status(400).json({ message: "All fields are required" });
@@ -16,7 +17,7 @@ carsRoutes.post('/register', async (req, res) => {
         return res.status(400).json({ message: "Password must be at least 5 characters long" });
     }
 
-    const emailExists = await UserSchem.findOne({ email });
+    const emailExists = await UserModel.findOne({ email });
 
     if (emailExists) {
         return res.status(400).json({ message: "Email aready Registered!!!" });
@@ -24,7 +25,7 @@ carsRoutes.post('/register', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const registerUser = new UserSchem({ email: email, username: username, password: hashedPassword });
+    const registerUser = new UserModel({ email: email, username: username, password: hashedPassword });
 
     try {
         const savedUser = await registerUser.save();
@@ -33,10 +34,28 @@ carsRoutes.post('/register', async (req, res) => {
             message: "User Registered successfully",
             user: { email: savedUser.email, username: savedUser.username },
         });
-    }catch(err){
-        return res.status(500).json({ message: "Server Error"})
+    } catch (err) {
+        return res.status(500).json({ message: "Server Error" })
+    }
+})
+
+carsRoutes.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    const findUser = await UserModel.findOne({ email: email })
+
+    if (!findUser) {
+        return res.status(401).json({ msg: "invalid username/password" });
     }
 
+    const isMatch = await bcrypt.compare(password, findUser.password);
+
+    console.log(isMatch);
+    if (!isMatch) {
+        return res.status(401).json({ msg: "Invalid username or password" });
+    }
+
+    return res.status(200).json({ findUser });
 })
 
 export default carsRoutes;
