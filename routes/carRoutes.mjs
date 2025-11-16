@@ -64,7 +64,7 @@ carsRoutes.post('/login', loginSchema, async (req, res) => {
         { expiresIn: "1h" }
     );
 
-    return res.status(200).cookie("token", token, {
+    res.cookie("token", token, {
         httpOnly: true,
         secure: true,
         sameSite: "lax",
@@ -75,6 +75,22 @@ carsRoutes.post('/login', loginSchema, async (req, res) => {
         username: findUser.username,
         email: findUser.email,
     });
+})
+
+carsRoutes.get('/userstatus', (req, res) => {
+    const token = req.cookies.token;
+    console.log(token);
+ 
+    if(!token){
+        return res.status(401).json({ loggedIn: false })
+    }
+
+    try{
+        const user = jwt.verify(token, process.env.JWT_SECRET);
+        return res.json({LoggedIn: true, user })
+    }catch(err){
+        return res.status(401).json({ loggedIn: false})
+    }
 })
 
 export default carsRoutes;

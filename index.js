@@ -4,32 +4,37 @@ import dotenv from 'dotenv';
 import { connectDB } from "./mongoose/mongoose.mjs";
 import mongoose from "mongoose";
 import carsRoutes from "./routes/carRoutes.mjs";
+import cookieParser from "cookie-parser";
 
-dotenv.config(); 
+dotenv.config();
 
 // connectDB();
 
-const app = express(); 
+const app = express();
 
 const allowedOrigins = [
-  "http://localhost:5174",
-  "http://localhost:5173",
-  "https://carfrontend-rust.vercel.app",
-  "https://carfrontend-git-main-sidneys-projects-2af13f64.vercel.app",
-  "https://carfrontend-k7ioppyld-sidneys-projects-2af13f64.vercel.app"
+    "http://localhost:5174",
+    "http://localhost:5173",
+    "http://localhost:5173/mycars",
+    "https://carfrontend-rust.vercel.app",
+    "https://carfrontend-git-main-sidneys-projects-2af13f64.vercel.app",
+    "https://carfrontend-k7ioppyld-sidneys-projects-2af13f64.vercel.app"
 ];
 
 app.use(cors({
-    origin: function (origin, callback) { 
+    origin: function (origin, callback) {
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
             callback(new Error("Not allowed by CORS"));
         }
-    }, credentials: true,
+    },
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
 }));
+
+app.use(cookieParser());
 
 app.use(express.json());
 
