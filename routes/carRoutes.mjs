@@ -4,9 +4,10 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { registerSchema, loginSchema } from '../utils/validationSchemas.mjs';
 import { validationResult, matchedData } from 'express-validator';
+import { verifyToken } from "../middleware/verifyToken.mjs";
+
 
 const carsRoutes = express.Router();
-
 
 carsRoutes.post('/register', registerSchema, async (req, res) => {
     const errors = validationResult(req);
@@ -93,7 +94,7 @@ carsRoutes.get('/userstatus', (req, res) => {
     }
 })
 
-carsRoutes.get('/cars', async (req, res) => {
+carsRoutes.get('/cars', verifyToken, async (req, res) => {
     try {
         const allCars = await CarModel.find();
 
