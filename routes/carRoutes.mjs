@@ -1,5 +1,5 @@
 import express from 'express';
-import { UserModel } from '../mongoose/UserSchema.mjs';
+import { UserModel, CarModel } from '../mongoose/UserSchema.mjs';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { registerSchema, loginSchema } from '../utils/validationSchemas.mjs';
@@ -90,6 +90,16 @@ carsRoutes.get('/userstatus', (req, res) => {
         return res.json({ LoggedIn: true, user })
     } catch (err) {
         return res.status(401).json({ loggedIn: false })
+    }
+})
+
+carsRoutes.get('/cars', async (req, res) => {
+    try {
+        const allCars = await CarModel.find();
+
+        return res.status(200).json(allCars);
+    } catch (err) {
+        res.status(400).json({ msg: "Error getting cars." });;
     }
 })
 

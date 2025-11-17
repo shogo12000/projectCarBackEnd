@@ -21,4 +21,14 @@ const UserSchema = new Schema({
     }
 })
 
+const CarSchema = ({
+    brand: {
+        type: String,
+    },
+    model: {
+        type: Array
+    }
+})
+
 export const UserModel = mongoose.model("carusers", UserSchema);
+export const CarModel = mongoose.model("brandcars", CarSchema);
