@@ -1,5 +1,5 @@
 import express from 'express';
-import { UserModel, CarModel } from '../mongoose/UserSchema.mjs';
+import { UserModel, CarModel, AddCarModel } from '../mongoose/UserSchema.mjs';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { registerSchema, loginSchema } from '../utils/validationSchemas.mjs';
@@ -60,7 +60,7 @@ carsRoutes.post('/login', loginSchema, async (req, res) => {
     }
 
     const token = jwt.sign(
-        { username: findUser.username, email: findUser.email },
+        { _id: findUser._id, username: findUser.username, email: findUser.email },
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
     );
@@ -110,6 +110,31 @@ carsRoutes.post('/logout', (req, res) => {
         secure: true,
         sameSite: "none",
     }).status(200).json({ msg: "Logout Success" })
+})
+
+carsRoutes.post('/addcar', verifyToken, async (req, res) => {
+    const { brand, model, year, price } = req.body;
+
+    if (!brand || !model || !year || !price) {
+        return res.status(400).json({ msg: "All fields are required" });
+    }
+
+    try {
+        const newCar = new AddCarModel({
+            brand,
+            model,
+            year,
+            price,
+            userId: req.user._id, // pega do token
+        });
+        await newCar.save();
+
+        return res.status(201).json({ msg: "Car added successfully", car: newCar });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ msg: "Server error" });
+    }
+
 })
 
 export default carsRoutes;
