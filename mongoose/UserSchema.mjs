@@ -16,7 +16,6 @@ const UserSchema = new Schema({
     },
     password: {
         type: String,
-        required: true,
         trim: true,
     }
 })
@@ -57,6 +56,10 @@ const AddCarSchema = new Schema(
       ref: "User", // referência ao usuário que adicionou o carro
       required: true,
     },
+    photo: {
+      type: String,
+      trim: true,
+    }
   },
   { timestamps: true } // cria campos createdAt e updatedAt automaticamente
 );

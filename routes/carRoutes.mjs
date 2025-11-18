@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import { registerSchema, loginSchema, addCarSchema } from '../utils/validationSchemas.mjs';
 import { validationResult, matchedData } from 'express-validator';
 import { verifyToken } from "../middleware/verifyToken.mjs";
-
+import upload from "../middleware/upload.mjs"
 
 const carsRoutes = express.Router();
 
@@ -111,8 +111,7 @@ carsRoutes.post('/logout', (req, res) => {
         sameSite: "none",
     }).status(200).json({ msg: "Logout Success" })
 })
-
-carsRoutes.post("/addcar", verifyToken, addCarSchema, async (req, res) => {
+carsRoutes.post("/addcar", verifyToken, upload.single("photo"), addCarSchema, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -127,6 +126,7 @@ carsRoutes.post("/addcar", verifyToken, addCarSchema, async (req, res) => {
             year,
             price,
             userId: req.user._id,
+            photo: req.file ? req.file.filename : null,
         });
 
         await newCar.save();
@@ -136,6 +136,31 @@ carsRoutes.post("/addcar", verifyToken, addCarSchema, async (req, res) => {
         return res.status(500).json({ msg: "Server error" });
     }
 });
+
+// carsRoutes.post("/addcar", verifyToken, addCarSchema, async (req, res) => {
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) {
+//         return res.status(400).json({ errors: errors.array() });
+//     }
+
+//     const { brand, model, year, price } = matchedData(req);
+
+//     try {
+//         const newCar = new AddCarModel({
+//             brand,
+//             model,
+//             year,
+//             price,
+//             userId: req.user._id,
+//         });
+
+//         await newCar.save();
+//         return res.status(201).json({ msg: "Car added successfully", car: newCar });
+//     } catch (err) {
+//         console.error(err);
+//         return res.status(500).json({ msg: "Server error" });
+//     }
+// });
 // carsRoutes.post('/addcar', verifyToken, async (req, res) => {
 //     const { brand, model, year, price } = req.body;
 

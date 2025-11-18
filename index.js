@@ -28,6 +28,8 @@ app.use(cors({
     allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
+//app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static("uploads"));
 
 app.use(cookieParser());
 
