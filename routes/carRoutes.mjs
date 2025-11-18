@@ -1,11 +1,14 @@
 import express from 'express';
+import cloudinary from '../middleware/cloudinaryConfig.mjs';
 import { UserModel, CarModel, AddCarModel } from '../mongoose/UserSchema.mjs';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { registerSchema, loginSchema, addCarSchema } from '../utils/validationSchemas.mjs';
 import { validationResult, matchedData } from 'express-validator';
 import { verifyToken } from "../middleware/verifyToken.mjs";
-import upload from "../middleware/upload.mjs"
+//import upload from "../middleware/upload.mjs"
+import { upload } from '../middleware/photoStorage.mjs';
+import streamifier from "streamifier";
 
 const carsRoutes = express.Router();
 
@@ -111,6 +114,8 @@ carsRoutes.post('/logout', (req, res) => {
         sameSite: "none",
     }).status(200).json({ msg: "Logout Success" })
 })
+
+
 carsRoutes.post("/addcar", verifyToken, upload.single("photo"), addCarSchema, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -119,14 +124,33 @@ carsRoutes.post("/addcar", verifyToken, upload.single("photo"), addCarSchema, as
 
     const { brand, model, year, price } = matchedData(req);
 
+
+
     try {
+        let photoUrl = "";
+
+        if (req.file) {
+            const result = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    { folder: "cars" },
+                    (error, result) => {
+                        if (error) return reject(error);
+                        resolve(result);
+                    }
+                );
+                streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+            });
+
+            photoUrl = result.secure_url;
+        }
+
         const newCar = new AddCarModel({
             brand,
             model,
             year,
             price,
             userId: req.user._id,
-            photo: req.file ? req.file.filename : null,
+            photo: photoUrl,
         });
 
         await newCar.save();
@@ -137,7 +161,7 @@ carsRoutes.post("/addcar", verifyToken, upload.single("photo"), addCarSchema, as
     }
 });
 
-// carsRoutes.post("/addcar", verifyToken, addCarSchema, async (req, res) => {
+
 //     const errors = validationResult(req);
 //     if (!errors.isEmpty()) {
 //         return res.status(400).json({ errors: errors.array() });

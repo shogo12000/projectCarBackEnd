@@ -8,7 +8,7 @@ import cookieParser from "cookie-parser";
 
 dotenv.config();
 
-// connectDB();
+connectDB();
 
 const app = express();
 
@@ -50,10 +50,10 @@ app.get("/health", (req, res) => {
     }
 });
 
-export default async function handler(req, res) {
-  await connectDB();  
-  return app(req, res);
-}
+// export default async function handler(req, res) {
+//   await connectDB();  
+//   return app(req, res);
+// }
 
 
 const PORT = 3000;
