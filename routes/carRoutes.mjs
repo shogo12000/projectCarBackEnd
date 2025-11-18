@@ -2,7 +2,7 @@ import express from 'express';
 import { UserModel, CarModel, AddCarModel } from '../mongoose/UserSchema.mjs';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { registerSchema, loginSchema } from '../utils/validationSchemas.mjs';
+import { registerSchema, loginSchema, addCarSchema } from '../utils/validationSchemas.mjs';
 import { validationResult, matchedData } from 'express-validator';
 import { verifyToken } from "../middleware/verifyToken.mjs";
 
@@ -112,12 +112,13 @@ carsRoutes.post('/logout', (req, res) => {
     }).status(200).json({ msg: "Logout Success" })
 })
 
-carsRoutes.post('/addcar', verifyToken, async (req, res) => {
-    const { brand, model, year, price } = req.body;
-
-    if (!brand || !model || !year || !price) {
-        return res.status(400).json({ msg: "All fields are required" });
+carsRoutes.post("/addcar", verifyToken, addCarSchema, async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
     }
+
+    const { brand, model, year, price } = matchedData(req);
 
     try {
         const newCar = new AddCarModel({
@@ -125,28 +126,51 @@ carsRoutes.post('/addcar', verifyToken, async (req, res) => {
             model,
             year,
             price,
-            userId: req.user._id, // pega do token
+            userId: req.user._id,
         });
-        await newCar.save();
 
+        await newCar.save();
         return res.status(201).json({ msg: "Car added successfully", car: newCar });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ msg: "Server error" });
     }
-
 });
+// carsRoutes.post('/addcar', verifyToken, async (req, res) => {
+//     const { brand, model, year, price } = req.body;
 
-carsRoutes.get('/usercar', verifyToken, async (req, res) =>{
-    try{
+//     if (!brand || !model || !year || !price) {
+//         return res.status(400).json({ msg: "All fields are required" });
+//     }
+
+//     try {
+//         const newCar = new AddCarModel({
+//             brand,
+//             model,
+//             year,
+//             price,
+//             userId: req.user._id, // pega do token
+//         });
+//         await newCar.save();
+
+//         return res.status(201).json({ msg: "Car added successfully", car: newCar });
+//     } catch (err) {
+//         console.error(err);
+//         return res.status(500).json({ msg: "Server error" });
+//     }
+
+// });
+
+carsRoutes.get('/usercar', verifyToken, async (req, res) => {
+    try {
         const userId = req.user._id;
 
-        const userCars = await AddCarModel.find({ userId});
-        
+        const userCars = await AddCarModel.find({ userId });
+
         res.status(200).json(userCars);
-    }catch(err){
+    } catch (err) {
         console.log(err);
-        res.status(500).json({msg: "Erro getting user car"});
+        res.status(500).json({ msg: "Erro getting user car" });
     }
 })
 
