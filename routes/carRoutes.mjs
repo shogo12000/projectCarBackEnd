@@ -97,13 +97,13 @@ carsRoutes.get('/userstatus', (req, res) => {
     }
 })
 
-carsRoutes.get('/cars', verifyToken, async (req, res) => {
+carsRoutes.get('/cars', async (req, res) => {
     try {
         const allCars = await CarModel.find();
 
         return res.status(200).json(allCars);
     } catch (err) {
-        res.status(400).json({ msg: "Error getting cars." });;
+        res.status(400).json({ msg: "Error getting cars.." });;
     }
 })
 
@@ -210,6 +210,17 @@ carsRoutes.post("/addcar", verifyToken, upload.single("photo"), addCarSchema, as
 
 // });
 
+carsRoutes.get('/allcar', async (req, res) => {
+    try {
+
+        const userCars = await AddCarModel.find();
+
+        res.status(200).json(userCars);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ msg: "Erro getting user car" });
+    }
+})
 carsRoutes.get('/usercar', verifyToken, async (req, res) => {
     try {
         const userId = req.user._id;
