@@ -135,6 +135,19 @@ carsRoutes.post('/addcar', verifyToken, async (req, res) => {
         return res.status(500).json({ msg: "Server error" });
     }
 
+});
+
+carsRoutes.get('/usercar', verifyToken, async (req, res) =>{
+    try{
+        const userId = req.user._id;
+
+        const userCars = await AddCarModel.find({ userId});
+        
+        res.status(200).json(userCars);
+    }catch(err){
+        console.log(err);
+        res.status(500).json({msg: "Erro getting user car"});
+    }
 })
 
 export default carsRoutes;
