@@ -161,54 +161,87 @@ carsRoutes.post("/addcar", verifyToken, upload.single("photo"), addCarSchema, as
     }
 });
 
+carsRoutes.post("/updatecar", verifyToken, upload.single("photo"), addCarSchema, async (req, res) => {
+    const errors = validationResult(req);
 
-//     const errors = validationResult(req);
-//     if (!errors.isEmpty()) {
-//         return res.status(400).json({ errors: errors.array() });
-//     }
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
 
-//     const { brand, model, year, price } = matchedData(req);
+    const { brand, model, year, price, userId } = matchedData(req);
 
-//     try {
-//         const newCar = new AddCarModel({
-//             brand,
-//             model,
-//             year,
-//             price,
-//             userId: req.user._id,
-//         });
+    const myId = req.user._id;
 
-//         await newCar.save();
-//         return res.status(201).json({ msg: "Car added successfully", car: newCar });
-//     } catch (err) {
-//         console.error(err);
-//         return res.status(500).json({ msg: "Server error" });
-//     }
-// });
-// carsRoutes.post('/addcar', verifyToken, async (req, res) => {
-//     const { brand, model, year, price } = req.body;
+    try {
+        const car = await AddCarModel.findById(userId);
 
-//     if (!brand || !model || !year || !price) {
-//         return res.status(400).json({ msg: "All fields are required" });
-//     }
+        if (!car) return res.status(404).json({ msg: "Car not found!!!" });
 
-//     try {
-//         const newCar = new AddCarModel({
-//             brand,
-//             model,
-//             year,
-//             price,
-//             userId: req.user._id, // pega do token
-//         });
-//         await newCar.save();
+        if (car.userId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ msg: "Not allowed to edit this car" });
+        }
 
-//         return res.status(201).json({ msg: "Car added successfully", car: newCar });
-//     } catch (err) {
-//         console.error(err);
-//         return res.status(500).json({ msg: "Server error" });
-//     }
+        car.brand = brand || car.brand;
+        car.model = model || car.model;
+        car.year = year || car.year;
+        car.price = price || car.price;
 
-// });
+        if (req.file) {
+            const result = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    { folder: "cars" },
+                    (error, result) => {
+                        if (error) return reject(error);
+                        resolve(result);
+                    }
+                );
+                streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+            });
+
+            car.photo = result.secure_url; // substitui a foto antiga
+        }
+
+        await car.save();
+        return res.status(200).json({ msg: "Car updated successfully", car });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ msg: "Server error" });
+    }
+    // try {
+    //     let photoUrl = "";
+
+    //     if (req.file) {
+    //         const result = await new Promise((resolve, reject) => {
+    //             const uploadStream = cloudinary.uploader.upload_stream(
+    //                 { folder: "cars" },
+    //                 (error, result) => {
+    //                     if (error) return reject(error);
+    //                     resolve(result);
+    //                 }
+    //             );
+    //             streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+    //         });
+
+    //         photoUrl = result.secure_url;
+    //     }
+
+    //     const newCar = new AddCarModel({
+    //         brand,
+    //         model,
+    //         year,
+    //         price,
+    //         userId: req.user._id,
+    //         photo: photoUrl,
+    //     });
+
+    //     await newCar.save();
+    //     return res.status(201).json({ msg: "Car added successfully", car: newCar });
+    // } catch (err) {
+    //     console.error(err);
+    //     return res.status(500).json({ msg: "Server error" });
+    // }
+});
+
 
 carsRoutes.get('/allcar', async (req, res) => {
     try {
@@ -221,6 +254,7 @@ carsRoutes.get('/allcar', async (req, res) => {
         res.status(500).json({ msg: "Erro getting user car" });
     }
 })
+
 carsRoutes.get('/usercar', verifyToken, async (req, res) => {
     try {
         const userId = req.user._id;
@@ -231,6 +265,23 @@ carsRoutes.get('/usercar', verifyToken, async (req, res) => {
     } catch (err) {
         console.log(err);
         res.status(500).json({ msg: "Erro getting user car" });
+    }
+})
+
+carsRoutes.get('/editcar/:id', verifyToken, async (req, res) => {
+    try {
+        const carId = req.params.id;
+
+        const car = await AddCarModel.findById(carId);
+
+        if (!car) {
+            return res.status(404).json({ msg: "Car not found!" });
+        }
+
+        res.status(200).json(car);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ msg: "Erro getting car by id" });
     }
 })
 

@@ -52,6 +52,9 @@ export const registerSchema = checkSchema({
 })
 
 export const addCarSchema = checkSchema({
+  userId: {
+    in: ["body"],
+  },
   brand: {
     in: ["body"],
     notEmpty: {
